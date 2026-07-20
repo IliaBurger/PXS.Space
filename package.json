@@ -1,14 +1,14 @@
 {
-  "name": "pxs-3d",
+  "name": "pxs.space",
   "version": "1.0.0",
-  "description": "PXS 3D Models Stock",
+  "description": "PXS.Space marketplace and 3D assets platform",
   "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "postinstall": "npm rebuild sqlite3 --build-from-source"
+  },
   "dependencies": {
-    "express": "^4.22.2",
-    "express-fileupload": "^1.5.0",
-    "multer": "^2.2.0",
-    "pg": "^8.11.3",
-    "socket.io": "^4.8.3",
-    "sqlite3": "^6.0.1"
+    "express": "^4.19.2",
+    "sqlite3": "^5.1.7"
   }
 }
