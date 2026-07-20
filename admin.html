@@ -45,18 +45,18 @@
         </div>
 
         <div>
-          <label id="labelCategory" style="display: block; margin-bottom: 6px; color: var(--text-secondary);">Категория (10 вариантов)</label>
+          <label id="labelCategory" style="display: block; margin-bottom: 6px; color: var(--text-secondary);">Категория</label>
           <select id="modelCategory" style="width: 100%; padding: 12px; background: #0b0f19; border: 1px solid var(--border-color); color: #fff; border-radius: 8px; cursor: pointer;">
-            <option value="Spaceships">Spaceships (Космические корабли)</option>
-            <option value="Planets & Asteroids">Planets & Asteroids (Планеты и астероиды)</option>
-            <option value="Sci-Fi Environments">Sci-Fi Environments (Научно-фантастические локации)</option>
-            <option value="Cyberpunk & Tech">Cyberpunk & Tech (Киберпанк и технологии)</option>
-            <option value="Robots & Mechs">Robots & Mechs (Роботы и мехи)</option>
-            <option value="Space Stations">Space Stations (Космические станции)</option>
-            <option value="Aliens & Creatures">Aliens & Creatures (Инопланетяне и существа)</option>
-            <option value="Weapons & Gear">Weapons & Gear (Оружие и снаряжение)</option>
-            <option value="Abstract & Neon">Abstract & Neon (Абстракция и неон)</option>
-            <option value="Modules & Props">Modules & Props (Модули и реквизит)</option>
+            <option value="Furniture">Furniture (Мебель)</option>
+            <option value="Nature & Plants">Nature & Plants (Природа и растения)</option>
+            <option value="Architecture & Interior">Architecture & Interior (Архитектура и интерьер)</option>
+            <option value="Characters & Creatures">Characters & Creatures (Персонажи и существа)</option>
+            <option value="Vehicles & Tech">Vehicles & Tech (Транспорт и техника)</option>
+            <option value="Electronics & Gadgets">Electronics & Gadgets (Электроника и гаджеты)</option>
+            <option value="Clothing & Fashion">Clothing & Fashion (Одежда и мода)</option>
+            <option value="Food & Drinks">Food & Drinks (Еда и напитки)</option>
+            <option value="Tools & Equipment">Tools & Equipment (Инструменты и оборудование)</option>
+            <option value="Abstract & Decor">Abstract & Decor (Абстракция и декор)</option>
           </select>
         </div>
 
@@ -72,7 +72,6 @@
   </main>
 
   <script>
-    // Словарь для переключения языков
     const translations = {
       ru: {
         pageTitle: "PXS // Панель управления",
@@ -83,7 +82,7 @@
         loginBtn: "Войти",
         panelTitle: "Добавить новую 3D-модель",
         labelTitle: "Название модели",
-        labelCategory: "Категория (10 вариантов)",
+        labelCategory: "Категория",
         labelAuthor: "Автор",
         submitBtn: "Опубликовать модель",
         successMsg: "Модель успешно добавлена!",
@@ -98,7 +97,7 @@
         loginBtn: "Login",
         panelTitle: "Add New 3D Model",
         labelTitle: "Model Title",
-        labelCategory: "Category (10 options)",
+        labelCategory: "Category",
         labelAuthor: "Author",
         submitBtn: "Publish Model",
         successMsg: "Model successfully added!",
@@ -129,7 +128,6 @@
       setLanguage(e.target.value);
     });
 
-    // Логика авторизации
     const loginForm = document.getElementById('loginForm');
     const loginSection = document.getElementById('loginSection');
     const adminPanel = document.getElementById('adminPanel');
@@ -147,7 +145,6 @@
       }
     });
 
-    // Отправка формы добавления модели на сервер
     const addModelForm = document.getElementById('addModelForm');
     addModelForm.addEventListener('submit', async (e) => {
       e.preventDefault();
