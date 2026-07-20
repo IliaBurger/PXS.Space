@@ -14,24 +14,29 @@
     <nav>
       <a href="index.html" class="active">Обзор</a>
       <a href="admin.html">Админка</a>
-      <a href="upload.html">Загрузить модель</a>
     </nav>
   </header>
 
   <!-- Главный экран (Поиск + Рекомендация) -->
   <section class="hero-section">
     <div class="hero-content">
-      <h1>Лучшие бесплатные 3D-модели от космического сообщества.</h1>
-      <p>Открытая библиотека цифровых активов, кораблей и объектов для ваших миров.</p>
+      <h1>Лучшие бесплатные 3D-модели от сообщества.</h1>
+      <p>Открытая библиотека цифровых активов, мебели, объектов и природы для ваших проектов.</p>
       
       <!-- Поиск в стиле Pexels -->
       <div class="search-bar">
         <select id="searchCategory">
-          <option value="all">Модели</option>
-          <option value="sci-fi">Sci-Fi</option>
-          <option value="architecture">Architecture</option>
-          <option value="characters">Characters</option>
-          <option value="vehicles">Vehicles</option>
+          <option value="all">Все категории</option>
+          <option value="Furniture">Furniture</option>
+          <option value="Nature & Plants">Nature & Plants</option>
+          <option value="Architecture & Interior">Architecture & Interior</option>
+          <option value="Characters & Creatures">Characters & Creatures</option>
+          <option value="Vehicles & Tech">Vehicles & Tech</option>
+          <option value="Electronics & Gadgets">Electronics & Gadgets</option>
+          <option value="Clothing & Fashion">Clothing & Fashion</option>
+          <option value="Food & Drinks">Food & Drinks</option>
+          <option value="Tools & Equipment">Tools & Equipment</option>
+          <option value="Abstract & Decor">Abstract & Decor</option>
         </select>
         <input type="text" id="searchInput" placeholder="Поиск 3D моделей...">
       </div>
@@ -39,28 +44,32 @@
 
     <!-- Рекомендация недели -->
     <div class="recommendation-card">
-      <div class="rec-image">
-        <!-- Графический элемент -->
-      </div>
+      <div class="rec-image"></div>
       <div class="rec-info">
         <div class="rec-tag">Рекомендация недели</div>
-        <div class="rec-title">Космические станции</div>
+        <div class="rec-title">Современная мебель & Интерьер</div>
       </div>
     </div>
   </section>
 
   <!-- Фильтры категорий -->
-  <div class="categories-container">
-    <button class="category-btn active" data-filter="all">Все модели</button>
-    <button class="category-btn" data-filter="Sci-Fi">Sci-Fi</button>
-    <button class="category-btn" data-filter="Architecture">Architecture</button>
-    <button class="category-btn" data-filter="Characters">Characters</button>
-    <button class="category-btn" data-filter="Vehicles">Vehicles</button>
+  <div class="categories-container" style="overflow-x: auto; display: flex; gap: 10px;">
+    <button class="category-btn active" data-filter="all">All / Все</button>
+    <button class="category-btn" data-filter="Furniture">Furniture</button>
+    <button class="category-btn" data-filter="Nature & Plants">Nature & Plants</button>
+    <button class="category-btn" data-filter="Architecture & Interior">Architecture & Interior</button>
+    <button class="category-btn" data-filter="Characters & Creatures">Characters & Creatures</button>
+    <button class="category-btn" data-filter="Vehicles & Tech">Vehicles & Tech</button>
+    <button class="category-btn" data-filter="Electronics & Gadgets">Electronics & Gadgets</button>
+    <button class="category-btn" data-filter="Clothing & Fashion">Clothing & Fashion</button>
+    <button class="category-btn" data-filter="Food & Drinks">Food & Drinks</button>
+    <button class="category-btn" data-filter="Tools & Equipment">Tools & Equipment</button>
+    <button class="category-btn" data-filter="Abstract & Decor">Abstract & Decor</button>
   </div>
 
   <!-- Сетка моделей -->
   <main class="models-grid" id="modelsGrid">
-    <!-- Сюда динамически подгружаются модели из базы данных -->
+    <!-- Сюда подгружаются модели из базы данных -->
   </main>
 
   <script src="script.js"></script>
