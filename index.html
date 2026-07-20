@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title id="mainTitle">PXS // Cosmic 3D Stock</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <style>
+        .pexels-hero-container {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 40px;
+            align-items: center;
+            padding: 40px 0 30px;
+        }
+        @media(max-width: 900px) {
+            .pexels-hero-container { grid-template-columns: 1fr; }
+            .hero-banners { display: none; }
+        }
+        .hero-text-block {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+        .hero-text-block h1 {
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+        .hero-text-block p {
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+        .search-box-wrapper {
+            display: flex;
+            width: 100%;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 8px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .search-box-wrapper select, .search-box-wrapper input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            padding: 12px 15px;
+            outline: none;
+            font-size: 15px;
+        }
+        .search-box-wrapper select {
+            border-right: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+        .search-box-wrapper input { flex-grow: 1; }
+        
+        .hero-banners {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        .banner-card {
+            min-width: 220px;
+            height: 280px;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            background: #1e293b;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 20px;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .banner-card img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6;
+        }
+        .banner-content { position: relative; z-index: 2; }
+        .banner-title { font-size: 18px; font-weight: 600; color: white; margin-bottom: 5px; }
+        .banner-tag { font-size: 12px; color: var(--text-muted); }
+
+        .sub-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+        .categories-list { display: flex; gap: 30px; }
+        .sub-nav-item {
+            color: var(--text-muted);
+            font-weight: 600;
+            padding-bottom: 12px;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            background: none;
+            border-top: none; border-left: none; border-right: none;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        .sub-nav-item.active, .sub-nav-item:hover {
+            color: var(--text-main);
+            border-bottom-color: var(--accent-color);
+        }
+        .lang-switcher {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            outline: none;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <header class="pexels-header">
+        <div class="logo-wrapper">
+            <span class="logo-text">PXS.SPACE</span>
+        </div>
+        <nav class="header-nav" style="display: flex; gap: 20px; align-items: center;">
+            <a href="index.html" id="navReview">Обзор</a>
+            <a href="admin.html" id="navAdmin" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">Админка</a>
+            <a href="admin.html" class="upload-btn" id="navUpload">Загрузить модель</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <section class="pexels-hero-container">
+            <div class="hero-text-block">
+                <h1 id="heroTitle">Лучшие бесплатные 3D-модели от космического сообщества.</h1>
+                <p id="heroDesc">Открытая библиотека цифровых активов, кораблей и объектов для ваших миров.</p>
+                
+                <div class="search-box-wrapper">
+                    <select id="searchType">
+                        <option value="models" id="optModels">Модели</option>
+                    </select>
+                    <input type="text" id="searchInput" placeholder="Поиск 3D моделей...">
+                </div>
+            </div>
+
+            <div class="hero-banners">
+                <div class="banner-card">
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60" alt="Sci-Fi">
+                    <div class="banner-content">
+                        <div class="banner-tag" id="bannerTag1">Рекомендация недели</div>
+                        <div class="banner-title" id="bannerTitle1">Космические станции</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="sub-nav">
+            <div class="categories-list">
+                <button class="sub-nav-item active" data-cat="All" id="catAll">Все модели</button>
+                <button class="sub-nav-item" data-cat="Sci-Fi">Sci-Fi</button>
+                <button class="sub-nav-item" data-cat="Architecture">Architecture</button>
+                <button class="sub-nav-item" data-cat="Characters">Characters</button>
+                <button class="sub-nav-item" data-cat="Vehicles">Vehicles</button>
+            </div>
+            <div>
+                <select id="langSelect" class="lang-switcher">
+                    <option value="ru">RU 🇷🇺</option>
+                    <option value="en">EN 🇬🇧</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="modelsGrid" class="models-grid"></div>
+
+        <div style="text-align: center; padding: 40px 0 20px;">
+            <a href="admin.html" id="adminLinkText" style="color: var(--text-muted); font-size: 12px; text-decoration: none; opacity: 0.6;">🔐 Панель администратора</a>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let currentLang = localStorage.getItem('pxs_lang') || 'ru';
+        document.getElementById('langSelect').value = currentLang;
+
+        const translations = {
+            ru: {
+                review: "Обзор", 
+                upload: "Загрузить модель",
+                adminHeader: "Админка",
+                title: "Лучшие бесплатные 3D-модели от космического сообщества.",
+                desc: "Открытая библиотека цифровых активов, кораблей и объектов для ваших миров.",
+                searchPh: "Поиск 3D моделей...",
+                all: "Все модели", 
+                view: "Смотреть", 
+                notFound: "Модели не найдены",
+                tag: "Рекомендация недели", 
+                bannerTitle: "Космические станции",
+                adminText: "🔐 Панель администратора",
+                optModelsText: "Модели",
+                noDesc: "Описание отсутствует"
+            },
+            en: {
+                review: "Overview", 
+                upload: "Upload Model",
+                adminHeader: "Admin",
+                title: "The best free 3D models from the space community.",
+                desc: "An open library of digital assets, spaceships, and objects for your worlds.",
+                searchPh: "Search 3D models...",
+                all: "All Models", 
+                view: "View", 
+                notFound: "No models found",
+                tag: "Weekly Pick", 
+                bannerTitle: "Space Stations",
+                adminText: "🔐 Admin Panel",
+                optModelsText: "Models",
+                noDesc: "No description"
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('pxs_lang', lang);
+            const t = translations[lang];
+
+            document.getElementById('navReview').innerText = t.review;
+            document.getElementById('navUpload').innerText = t.upload;
+            document.getElementById('navAdmin').innerText = t.adminHeader;
+            document.getElementById('heroTitle').innerText = t.title;
+            document.getElementById('heroDesc').innerText = t.desc;
+            document.getElementById('searchInput').placeholder = t.searchPh;
+            document.getElementById('catAll').innerText = t.all;
+            document.getElementById('bannerTag1').innerText = t.tag;
+            document.getElementById('bannerTitle1').innerText = t.bannerTitle;
+            document.getElementById('adminLinkText').innerText = t.adminText;
+            document.getElementById('optModels').innerText = t.optModelsText;
+            
+            fetchModels();
+        }
+
+        document.getElementById('langSelect').addEventListener('change', (e) => {
+            setLanguage(e.target.value);
+        });
+
+        let currentCategory = 'All';
+        let searchQuery = '';
+
+        const searchInput = document.getElementById('searchInput');
+        const modelsGrid = document.getElementById('modelsGrid');
+        const categoryButtons = document.querySelectorAll('.sub-nav-item');
+
+        async function fetchModels() {
+            try {
+                const res = await fetch(`/api/models?category=${currentCategory}&search=${encodeURIComponent(searchQuery)}`);
+                const data = await res.json();
+                renderModels(data.models);
+            } catch (err) { console.error(err); }
+        }
+
+        function renderModels(models) {
+            modelsGrid.innerHTML = '';
+            const t = translations[currentLang];
+            
+            if (!models || models.length === 0) {
+                modelsGrid.innerHTML = `<p style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 40px;">${t.notFound}</p>`;
+                return;
+            }
+
+            models.forEach(model => {
+                const card = document.createElement('div');
+                card.className = 'model-card';
+                const previewImg = model.preview_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60';
+
+                card.innerHTML = `
+                    <div style="width: 100%; height: 220px; background: #0b0f19; position: relative; border-radius: 16px 16px 0 0; overflow: hidden;">
+                        <model-viewer src="${model.file_url}" poster="${previewImg}" alt="${model.title}" auto-rotate camera-controls disable-zoom style="width: 100%; height: 100%; background: transparent;"></model-viewer>
+                    </div>
+                    <div class="model-info">
+                        <div class="model-title">${model.title}</div>
+                        <div class="model-desc">${model.description || t.noDesc}</div>
+                        <div class="model-footer">
+                            <span class="badge">${model.category}</span>
+                            <a href="model.html?id=${model.id}" class="download-btn">${t.view}</a>
+                        </div>
+                    </div>
+                `;
+                modelsGrid.appendChild(card);
+            });
+        }
+
+        socket.on('catalogUpdated', fetchModels);
+
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchQuery = e.target.value.trim();
+                fetchModels();
+            }, 300);
+        });
+
+        categoryButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                categoryButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.getAttribute('data-cat');
+                fetchModels();
+            });
+        });
+
+        setLanguage(currentLang);
+    </script>
+</body>
+</html>

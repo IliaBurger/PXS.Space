@@ -1,0 +1,14 @@
+{
+  "name": "pxs-3d",
+  "version": "1.0.0",
+  "description": "PXS 3D Models Stock",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.22.2",
+    "express-fileupload": "^1.5.0",
+    "multer": "^2.2.0",
+    "pg": "^8.11.3",
+    "socket.io": "^4.8.3",
+    "sqlite3": "^6.0.1"
+  }
+}
