@@ -25,7 +25,6 @@ body {
     radial-gradient(circle at 85% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
 }
 
-/* Шапка */
 header {
   display: flex;
   justify-content: space-between;
@@ -61,7 +60,6 @@ nav a:hover, nav a.active {
   color: var(--text-primary);
 }
 
-/* Главный блок поиска и баннера */
 .hero-section {
   max-width: 1200px;
   margin: 40px auto;
@@ -85,7 +83,6 @@ nav a:hover, nav a.active {
   margin-bottom: 30px;
 }
 
-/* Поиск в стиле Pexels */
 .search-bar {
   display: flex;
   background: var(--card-bg);
@@ -126,7 +123,6 @@ nav a:hover, nav a.active {
   color: var(--text-secondary);
 }
 
-/* Карточка рекомендации недели */
 .recommendation-card {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -143,10 +139,6 @@ nav a:hover, nav a.active {
 .rec-image {
   height: 180px;
   background: var(--accent-gradient);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
 }
 
 .rec-info {
@@ -166,7 +158,6 @@ nav a:hover, nav a.active {
   font-weight: 600;
 }
 
-/* Категории фильтров */
 .categories-container {
   max-width: 1200px;
   margin: 0 auto 30px auto;
@@ -175,6 +166,7 @@ nav a:hover, nav a.active {
   gap: 12px;
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 15px;
+  overflow-x: auto;
 }
 
 .category-btn {
@@ -187,6 +179,7 @@ nav a:hover, nav a.active {
   padding: 6px 12px;
   border-radius: 8px;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .category-btn:hover, .category-btn.active {
@@ -194,7 +187,6 @@ nav a:hover, nav a.active {
   background: var(--card-bg);
 }
 
-/* Сетка моделей */
 .models-grid {
   max-width: 1200px;
   margin: 0 auto;
@@ -225,6 +217,7 @@ nav a:hover, nav a.active {
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
+  font-size: 14px;
 }
 
 .model-details {
