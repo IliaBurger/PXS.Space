@@ -1,102 +1,177 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>PXS // Панель управления</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="pageTitle">PXS // Панель управления</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="pexels-header">
-        <div class="logo-wrapper">
-            <span class="logo-text">PXS.SPACE // ADMIN</span>
-        </div>
-        <nav class="header-nav">
-            <a href="index.html">На главную</a>
-        </nav>
-    </header>
 
-    <div class="container">
-        <!-- Блок авторизации -->
-        <div class="card" id="loginCard">
-            <h2>Вход в панель</h2>
-            <form id="loginForm">
-                <input type="text" id="username" placeholder="Логин (admin)" required>
-                <input type="password" id="password" placeholder="Пароль" required>
-                <button type="submit">Войти</button>
-            </form>
-        </div>
+  <!-- Шапка -->
+  <header>
+    <div class="logo">PXS.SPACE // ADMIN</div>
+    <nav style="display: flex; align-items: center;">
+      <a href="index.html" id="navHome">На главную</a>
+      <!-- Переключатель языков -->
+      <select id="langSwitcher" style="margin-left: 20px; background: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 6px; cursor: pointer;">
+        <option value="ru">RU</option>
+        <option value="en">EN</option>
+      </select>
+    </nav>
+  </header>
 
-        <!-- Блок загрузки контента -->
-        <div class="card" id="uploadCard" style="display: none; max-width: 600px;">
-            <h2>Загрузка новой 3D-модели</h2>
-            <form id="uploadForm">
-                <label style="font-size: 13px; color: var(--text-muted);">Название модели</label>
-                <input type="text" name="title" required placeholder="Например: Sci-Fi Drone">
-                
-                <label style="font-size: 13px; color: var(--text-muted);">Категория</label>
-                <select name="category" style="width:100%; padding: 12px 16px; background: rgba(3, 7, 18, 0.6); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); margin-bottom: 15px;">
-                    <option value="Sci-Fi">Sci-Fi</option>
-                    <option value="Architecture">Architecture</option>
-                    <option value="Characters">Characters</option>
-                    <option value="Vehicles">Vehicles</option>
-                </select>
-
-                <label style="font-size: 13px; color: var(--text-muted);">Описание</label>
-                <textarea name="description" placeholder="Краткое описание активов..." rows="3"></textarea>
-
-                <label style="font-size: 13px; color: var(--text-muted); display:block; margin-top:5px;">Файл модели (.glb)</label>
-                <input type="file" name="file" accept=".glb,.gltf" required style="color:var(--text-main); margin-bottom:15px;">
-
-                <label style="font-size: 13px; color: var(--text-muted); display:block; margin-top:5px;">Картинка-превью (обложка)</label>
-                <input type="file" name="preview" accept="image/*" style="color:var(--text-main); margin-bottom:20px;">
-
-                <button type="submit">Опубликовать модель</button>
-            </form>
-        </div>
+  <!-- Основной контент админки -->
+  <main style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
+    
+    <!-- Форма входа -->
+    <div id="loginSection" class="model-card" style="padding: 30px;">
+      <h2 id="loginTitle" style="margin-bottom: 20px; font-size: 24px;">Вход в панель</h2>
+      <form id="loginForm" style="display: flex; gap: 12px; flex-direction: column;">
+        <input type="text" id="adminUser" placeholder="Логин (admin)" required style="padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; border-radius: 8px;">
+        <input type="password" id="adminPass" placeholder="Пароль" required style="padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; border-radius: 8px;">
+        <button type="submit" id="loginBtn" style="padding: 12px; background: var(--accent-gradient); border: none; color: #fff; font-weight: 600; border-radius: 8px; cursor: pointer;">Войти</button>
+      </form>
     </div>
 
-    <script>
-        const loginCard = document.getElementById('loginCard');
-        const uploadCard = document.getElementById('uploadCard');
-        const loginForm = document.getElementById('loginForm');
-        const uploadForm = document.getElementById('uploadForm');
+    <!-- Панель добавления моделей (скрыта до входа) -->
+    <div id="adminPanel" style="display: none;">
+      <h2 id="panelTitle" style="margin-bottom: 20px; font-size: 24px;">Добавить новую 3D-модель</h2>
+      
+      <form id="addModelForm" class="model-card" style="padding: 30px; display: flex; gap: 16px; flex-direction: column;">
+        <div>
+          <label id="labelTitle" style="display: block; margin-bottom: 6px; color: var(--text-secondary);">Название модели</label>
+          <input type="text" id="modelTitle" required style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; border-radius: 8px;">
+        </div>
 
-        let authToken = localStorage.getItem('pxs_token') || '';
-        if (authToken) {
-            loginCard.style.display = 'none';
-            uploadCard.style.display = 'block';
+        <div>
+          <label id="labelCategory" style="display: block; margin-bottom: 6px; color: var(--text-secondary);">Категория (10 вариантов)</label>
+          <select id="modelCategory" style="width: 100%; padding: 12px; background: #0b0f19; border: 1px solid var(--border-color); color: #fff; border-radius: 8px; cursor: pointer;">
+            <option value="Spaceships">Spaceships (Космические корабли)</option>
+            <option value="Planets & Asteroids">Planets & Asteroids (Планеты и астероиды)</option>
+            <option value="Sci-Fi Environments">Sci-Fi Environments (Научно-фантастические локации)</option>
+            <option value="Cyberpunk & Tech">Cyberpunk & Tech (Киберпанк и технологии)</option>
+            <option value="Robots & Mechs">Robots & Mechs (Роботы и мехи)</option>
+            <option value="Space Stations">Space Stations (Космические станции)</option>
+            <option value="Aliens & Creatures">Aliens & Creatures (Инопланетяне и существа)</option>
+            <option value="Weapons & Gear">Weapons & Gear (Оружие и снаряжение)</option>
+            <option value="Abstract & Neon">Abstract & Neon (Абстракция и неон)</option>
+            <option value="Modules & Props">Modules & Props (Модули и реквизит)</option>
+          </select>
+        </div>
+
+        <div>
+          <label id="labelAuthor" style="display: block; margin-bottom: 6px; color: var(--text-secondary);">Автор</label>
+          <input type="text" id="modelAuthor" placeholder="Имя автора" required style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; border-radius: 8px;">
+        </div>
+
+        <button type="submit" id="submitBtn" style="padding: 12px; background: var(--accent-gradient); border: none; color: #fff; font-weight: 600; border-radius: 8px; cursor: pointer; margin-top: 10px;">Опубликовать модель</button>
+      </form>
+    </div>
+
+  </main>
+
+  <script>
+    // Словарь для переключения языков
+    const translations = {
+      ru: {
+        pageTitle: "PXS // Панель управления",
+        navHome: "На главную",
+        loginTitle: "Вход в панель",
+        userPlaceholder: "Логин (admin)",
+        passPlaceholder: "Пароль",
+        loginBtn: "Войти",
+        panelTitle: "Добавить новую 3D-модель",
+        labelTitle: "Название модели",
+        labelCategory: "Категория (10 вариантов)",
+        labelAuthor: "Автор",
+        submitBtn: "Опубликовать модель",
+        successMsg: "Модель успешно добавлена!",
+        errorLogin: "Неверный логин или пароль"
+      },
+      en: {
+        pageTitle: "PXS // Admin Panel",
+        navHome: "Home",
+        loginTitle: "Admin Login",
+        userPlaceholder: "Username (admin)",
+        passPlaceholder: "Password",
+        loginBtn: "Login",
+        panelTitle: "Add New 3D Model",
+        labelTitle: "Model Title",
+        labelCategory: "Category (10 options)",
+        labelAuthor: "Author",
+        submitBtn: "Publish Model",
+        successMsg: "Model successfully added!",
+        errorLogin: "Invalid username or password"
+      }
+    };
+
+    const langSwitcher = document.getElementById('langSwitcher');
+    let currentLang = 'ru';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const t = translations[lang];
+      document.getElementById('pageTitle').innerText = t.pageTitle;
+      document.getElementById('navHome').innerText = t.navHome;
+      document.getElementById('loginTitle').innerText = t.loginTitle;
+      document.getElementById('adminUser').placeholder = t.userPlaceholder;
+      document.getElementById('adminPass').placeholder = t.passPlaceholder;
+      document.getElementById('loginBtn').innerText = t.loginBtn;
+      document.getElementById('panelTitle').innerText = t.panelTitle;
+      document.getElementById('labelTitle').innerText = t.labelTitle;
+      document.getElementById('labelCategory').innerText = t.labelCategory;
+      document.getElementById('labelAuthor').innerText = t.labelAuthor;
+      document.getElementById('submitBtn').innerText = t.submitBtn;
+    }
+
+    langSwitcher.addEventListener('change', (e) => {
+      setLanguage(e.target.value);
+    });
+
+    // Логика авторизации
+    const loginForm = document.getElementById('loginForm');
+    const loginSection = document.getElementById('loginSection');
+    const adminPanel = document.getElementById('adminPanel');
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const user = document.getElementById('adminUser').value;
+      const pass = document.getElementById('adminPass').value;
+
+      if (user === 'admin' && pass === 'admin') {
+        loginSection.style.display = 'none';
+        adminPanel.style.display = 'block';
+      } else {
+        alert(translations[currentLang].errorLogin);
+      }
+    });
+
+    // Отправка формы добавления модели на сервер
+    const addModelForm = document.getElementById('addModelForm');
+    addModelForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('modelTitle').value;
+      const category = document.getElementById('modelCategory').value;
+      const author = document.getElementById('modelAuthor').value;
+
+      try {
+        const response = await fetch('/api/assets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, category, author, price: 0, file_path: '' })
+        });
+
+        if (response.ok) {
+          alert(translations[currentLang].successMsg);
+          addModelForm.reset();
+        } else {
+          alert('Error');
         }
-
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-            if (u === 'admin' && p === 'pxs_secret_2026') {
-                authToken = 'Bearer pxs_secure_token_abc123';
-                localStorage.setItem('pxs_token', authToken);
-                loginCard.style.display = 'none';
-                uploadCard.style.display = 'block';
-            } else {
-                alert('Неверный логин или пароль');
-            }
-        });
-
-        uploadForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(uploadForm);
-            
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (res.ok) {
-                alert('Модель успешно загружена!');
-                uploadForm.reset();
-            } else {
-                alert('Ошибка при загрузке');
-            }
-        });
-    </script>
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  </script>
 </body>
 </html>
