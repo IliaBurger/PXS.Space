@@ -1,14 +1,13 @@
 {
-  "name": "pxs.space",
+  "name": "pxs-space",
   "version": "1.0.0",
-  "description": "PXS.Space marketplace and 3D assets platform",
+  "description": "Cosmic 3D Models Marketplace",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "postinstall": "npm rebuild sqlite3 --build-from-source"
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.19.2",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "5.1.7"
   }
 }
