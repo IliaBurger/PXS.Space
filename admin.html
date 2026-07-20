@@ -72,7 +72,7 @@
   </main>
 
   <script>
-    const translations = {
+    const adminTranslations = {
       ru: {
         pageTitle: "PXS // Панель управления",
         navHome: "На главную",
@@ -106,11 +106,9 @@
     };
 
     const langSwitcher = document.getElementById('langSwitcher');
-    let currentLang = 'ru';
 
-    function setLanguage(lang) {
-      currentLang = lang;
-      const t = translations[lang];
+    function setAdminLanguage(lang) {
+      const t = adminTranslations[lang];
       document.getElementById('pageTitle').innerText = t.pageTitle;
       document.getElementById('navHome').innerText = t.navHome;
       document.getElementById('loginTitle').innerText = t.loginTitle;
@@ -122,12 +120,19 @@
       document.getElementById('labelCategory').innerText = t.labelCategory;
       document.getElementById('labelAuthor').innerText = t.labelAuthor;
       document.getElementById('submitBtn').innerText = t.submitBtn;
+      localStorage.setItem('pxs_lang', lang);
     }
 
     langSwitcher.addEventListener('change', (e) => {
-      setLanguage(e.target.value);
+      setAdminLanguage(e.target.value);
     });
 
+    // Установка языка при загрузке
+    const savedLang = localStorage.getItem('pxs_lang') || 'ru';
+    langSwitcher.value = savedLang;
+    setAdminLanguage(savedLang);
+
+    // Авторизация в админке
     const loginForm = document.getElementById('loginForm');
     const loginSection = document.getElementById('loginSection');
     const adminPanel = document.getElementById('adminPanel');
@@ -141,16 +146,18 @@
         loginSection.style.display = 'none';
         adminPanel.style.display = 'block';
       } else {
-        alert(translations[currentLang].errorLogin);
+        alert(adminTranslations[localStorage.getItem('pxs_lang') || 'ru'].errorLogin);
       }
     });
 
+    // Отправка данных на сервер (сохранение модели в БД)
     const addModelForm = document.getElementById('addModelForm');
     addModelForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const title = document.getElementById('modelTitle').value;
       const category = document.getElementById('modelCategory').value;
       const author = document.getElementById('modelAuthor').value;
+      const currentLang = localStorage.getItem('pxs_lang') || 'ru';
 
       try {
         const response = await fetch('/api/assets', {
@@ -160,10 +167,10 @@
         });
 
         if (response.ok) {
-          alert(translations[currentLang].successMsg);
+          alert(adminTranslations[currentLang].successMsg);
           addModelForm.reset();
         } else {
-          alert('Error');
+          alert('Error / Ошибка');
         }
       } catch (err) {
         console.error(err);
