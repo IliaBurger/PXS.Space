@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title id="pageTitle">PXS // Cosmic 3D Stock</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Подключаем Three.js для 3D просмотра -->
+  <!-- Подключаем Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -16,7 +16,6 @@
     <nav style="display: flex; align-items: center;">
       <a href="index.html" class="active" id="navBrowse">Обзор</a>
       <a href="admin.html" id="navAdmin">Админка</a>
-      <!-- Переключатель языков -->
       <select id="langSwitcher" style="margin-left: 20px; background: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 6px; cursor: pointer;">
         <option value="ru">RU</option>
         <option value="en">EN</option>
@@ -24,13 +23,12 @@
     </nav>
   </header>
 
-  <!-- Главный экран (Поиск + Интерактивное 3D-окно превью) -->
+  <!-- Главный экран -->
   <section class="hero-section" style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
     <div class="hero-content" style="flex: 1; min-width: 300px;">
       <h1 id="heroTitle">Лучшие бесплатные 3D-модели от сообщества.</h1>
       <p id="heroDesc">Открытая библиотека цифровых активов, мебели, объектов и природы для ваших проектов.</p>
       
-      <!-- Поиск -->
       <div class="search-bar" style="margin-top: 20px;">
         <select id="searchCategory">
           <option value="all" id="optAllCat">Все категории</option>
@@ -49,10 +47,8 @@
       </div>
     </div>
 
-    <!-- Интерактивное 3D-окно (Viewer) -->
     <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; align-items: center;">
       <div id="canvasContainer" style="width: 100%; height: 320px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 12px; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
-        <!-- Сюда вставляется 3D сцена через JS -->
         <div style="position: absolute; bottom: 10px; left: 15px; font-size: 12px; color: var(--text-secondary); pointer-events: none;" id="viewerLabel">
           🌌 Интерактивный 3D-просмотр (Demo)
         </div>
@@ -76,42 +72,46 @@
   </div>
 
   <!-- Сетка моделей -->
-  <main class="models-grid" id="modelsGrid">
-    <!-- Динамические карточки моделей из базы данных -->
-  </main>
+  <main class="models-grid" id="modelsGrid"></main>
+
+  <!-- Модальное окно 3D просмотра и скачивания -->
+  <div id="modelModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 7, 12, 0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #0b0f19; border: 1px solid var(--border-color); border-radius: 16px; width: 100%; max-width: 700px; padding: 30px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+      <button id="closeModal" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer;">&times;</button>
+      
+      <h2 id="modalTitle" style="font-size: 22px; margin-bottom: 6px; color: #fff;">Название модели</h2>
+      <p id="modalAuthor" style="font-size: 14px; color: var(--text-secondary); margin-bottom: 20px;">Автор</p>
+      
+      <!-- Контейнер для 3D просмотра в модалке -->
+      <div id="modalCanvasContainer" style="width: 100%; height: 350px; background: rgba(0,0,0,0.6); border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 20px; position: relative;"></div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span id="modalCategory" style="font-size: 13px; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 6px; color: var(--text-secondary);">Категория</span>
+        <a id="downloadBtn" href="#" download style="background: var(--accent-gradient); color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">📥 <span id="downloadText">Скачать модель</span></a>
+      </div>
+    </div>
+  </div>
 
   <script>
-    // Инициализация 3D сцены (Three.js) для главного экрана
+    // Рендер главного 3D превью
     const container = document.getElementById('canvasContainer');
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
-    // Добавляем космический вращающийся объект (пример 3D-модели: икосаэдр с градиентным материалом)
     const geometry = new THREE.IcosahedronGeometry(1.5, 0);
-    const material = new THREE.MeshStandardMaterial({ 
-      color: 0x6366f1, 
-      roughness: 0.2, 
-      metalness: 0.8,
-      wireframe: false 
-    });
+    const material = new THREE.MeshStandardMaterial({ color: 0x6366f1, roughness: 0.2, metalness: 0.8 });
     const cosmicObject = new THREE.Mesh(geometry, material);
     scene.add(cosmicObject);
 
-    // Освещение
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-    scene.add(ambientLight);
-
+    scene.add(new THREE.AmbientLight(0xffffff, 1));
     const pointLight = new THREE.PointLight(0x38bdf8, 3, 50);
     pointLight.position.set(5, 5, 5);
     scene.add(pointLight);
-
     camera.position.z = 4;
 
-    // Анимация вращения
     function animate3D() {
       requestAnimationFrame(animate3D);
       cosmicObject.rotation.x += 0.005;
@@ -120,14 +120,55 @@
     }
     animate3D();
 
-    // Адаптация под размер окна
-    window.addEventListener('resize', () => {
-      camera.aspect = container.clientWidth / container.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
+    // Модальное окно 3D просмотрщик
+    const modal = document.getElementById('modelModal');
+    const closeModal = document.getElementById('closeModal');
+    let modalRenderer, modalScene, modalCamera, modalMesh, animationFrameId;
+
+    function initModalViewer() {
+      const modalContainer = document.getElementById('modalCanvasContainer');
+      modalScene = new THREE.Scene();
+      modalCamera = new THREE.PerspectiveCamera(60, modalContainer.clientWidth / modalContainer.clientHeight, 0.1, 1000);
+      modalRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      modalRenderer.setSize(modalContainer.clientWidth, modalContainer.clientHeight);
+      modalContainer.innerHTML = '';
+      modalContainer.appendChild(modalRenderer.domElement);
+
+      const mGeo = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
+      const mMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.7 });
+      modalMesh = new THREE.Mesh(mGeo, mMat);
+      modalScene.add(modalMesh);
+
+      modalScene.add(new THREE.AmbientLight(0xffffff, 1.2));
+      const plight = new THREE.PointLight(0x6366f1, 3, 50);
+      plight.position.set(5, 5, 5);
+      modalScene.add(plight);
+      modalCamera.position.z = 4;
+
+      function animateModal() {
+        if (modal.style.display === 'flex') {
+          animationFrameId = requestAnimationFrame(animateModal);
+          modalMesh.rotation.x += 0.01;
+          modalMesh.rotation.y += 0.015;
+          modalRenderer.render(modalScene, modalCamera);
+        }
+      }
+      animateModal();
+    }
+
+    closeModal.addEventListener('click', () => {
+      modal.style.display = 'none';
+      cancelAnimationFrame(animationFrameId);
     });
 
-    // Переводы интерфейса
+    window.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+        cancelAnimationFrame(animationFrameId);
+      }
+    });
+
+    // Переводы
     const indexTranslations = {
       ru: {
         pageTitle: "PXS // Cosmic 3D Stock",
@@ -138,7 +179,8 @@
         optAllCat: "Все категории",
         searchPlaceholder: "Поиск 3D моделей...",
         viewerLabel: "🌌 Интерактивный 3D-просмотр",
-        filterAll: "All / Все"
+        filterAll: "All / Все",
+        downloadText: "Скачать модель"
       },
       en: {
         pageTitle: "PXS // Cosmic 3D Stock",
@@ -149,12 +191,12 @@
         optAllCat: "All Categories",
         searchPlaceholder: "Search 3D models...",
         viewerLabel: "🌌 Interactive 3D Viewer",
-        filterAll: "All / Все"
+        filterAll: "All / Все",
+        downloadText: "Download Model"
       }
     };
 
     const langSwitcher = document.getElementById('langSwitcher');
-    
     function setIndexLanguage(lang) {
       const t = indexTranslations[lang];
       document.getElementById('pageTitle').innerText = t.pageTitle;
@@ -166,6 +208,7 @@
       document.getElementById('searchInput').placeholder = t.searchPlaceholder;
       document.getElementById('viewerLabel').innerText = t.viewerLabel;
       document.getElementById('filterAll').innerText = t.filterAll;
+      document.getElementById('downloadText').innerText = t.downloadText;
       localStorage.setItem('pxs_lang', lang);
     }
 
@@ -178,7 +221,7 @@
     langSwitcher.value = savedLang;
     setIndexLanguage(savedLang);
 
-    // Загрузка моделей из базы данных (Render)
+    // Загрузка моделей и привязка клика для открытия 3D просмотра
     async function loadModels(category = 'all', search = '') {
       try {
         const res = await fetch('/api/assets');
@@ -200,6 +243,7 @@
         filtered.forEach(model => {
           const card = document.createElement('div');
           card.className = 'model-card';
+          card.style.cursor = 'pointer';
           card.innerHTML = `
             <div style="height: 180px; background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); border-bottom: 1px solid var(--border-color);">
               📦 ${model.category}
@@ -214,6 +258,29 @@
               </div>
             </div>
           `;
+
+          // Открытие модального окна по клику на карточку
+          card.addEventListener('click', () => {
+            document.getElementById('modalTitle').innerText = model.title;
+            document.getElementById('modalAuthor').innerText = `By ${model.author}`;
+            document.getElementById('modalCategory').innerText = model.category;
+            
+            // Настройка ссылки скачивания (если файл загружен)
+            const downloadBtn = document.getElementById('downloadBtn');
+            if (model.file_path) {
+              downloadBtn.href = `#`; // Здесь можно указать путь к файлу на сервере, когда настроите сохранение файлов
+              downloadBtn.style.pointerEvents = 'auto';
+              downloadBtn.style.opacity = '1';
+            } else {
+              downloadBtn.href = '#';
+              downloadBtn.style.pointerEvents = 'none';
+              downloadBtn.style.opacity = '0.5';
+            }
+
+            modal.style.display = 'flex';
+            setTimeout(initModalViewer, 50); // Инициализация 3D сцены в модалке
+          });
+
           grid.appendChild(card);
         });
       } catch (err) {
