@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title id="pageTitle">PXS // Cosmic 3D Stock</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Подключаем Three.js для 3D просмотра -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
@@ -22,14 +24,14 @@
     </nav>
   </header>
 
-  <!-- Главный экран (Поиск + Рекомендация) -->
-  <section class="hero-section">
-    <div class="hero-content">
+  <!-- Главный экран (Поиск + Интерактивное 3D-окно превью) -->
+  <section class="hero-section" style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
+    <div class="hero-content" style="flex: 1; min-width: 300px;">
       <h1 id="heroTitle">Лучшие бесплатные 3D-модели от сообщества.</h1>
       <p id="heroDesc">Открытая библиотека цифровых активов, мебели, объектов и природы для ваших проектов.</p>
       
-      <!-- Поиск в стиле Pexels -->
-      <div class="search-bar">
+      <!-- Поиск -->
+      <div class="search-bar" style="margin-top: 20px;">
         <select id="searchCategory">
           <option value="all" id="optAllCat">Все категории</option>
           <option value="Furniture">Furniture</option>
@@ -47,12 +49,13 @@
       </div>
     </div>
 
-    <!-- Рекомендация недели -->
-    <div class="recommendation-card">
-      <div class="rec-image"></div>
-      <div class="rec-info">
-        <div class="rec-tag" id="recTag">Рекомендация недели</div>
-        <div class="rec-title" id="recTitleText">Современная мебель & Интерьер</div>
+    <!-- Интерактивное 3D-окно (Viewer) -->
+    <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; align-items: center;">
+      <div id="canvasContainer" style="width: 100%; height: 320px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 12px; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+        <!-- Сюда вставляется 3D сцена через JS -->
+        <div style="position: absolute; bottom: 10px; left: 15px; font-size: 12px; color: var(--text-secondary); pointer-events: none;" id="viewerLabel">
+          🌌 Интерактивный 3D-просмотр (Demo)
+        </div>
       </div>
     </div>
   </section>
@@ -72,13 +75,59 @@
     <button class="category-btn" data-filter="Abstract & Decor">Abstract & Decor</button>
   </div>
 
-  <!-- Сетка моделей (данные подгружаются из базы данных) -->
+  <!-- Сетка моделей -->
   <main class="models-grid" id="modelsGrid">
-    <!-- Динамические карточки моделей из админки -->
+    <!-- Динамические карточки моделей из базы данных -->
   </main>
 
   <script>
-    // Словарь переводов для index.html
+    // Инициализация 3D сцены (Three.js) для главного экрана
+    const container = document.getElementById('canvasContainer');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+
+    // Добавляем космический вращающийся объект (пример 3D-модели: икосаэдр с градиентным материалом)
+    const geometry = new THREE.IcosahedronGeometry(1.5, 0);
+    const material = new THREE.MeshStandardMaterial({ 
+      color: 0x6366f1, 
+      roughness: 0.2, 
+      metalness: 0.8,
+      wireframe: false 
+    });
+    const cosmicObject = new THREE.Mesh(geometry, material);
+    scene.add(cosmicObject);
+
+    // Освещение
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(ambientLight);
+
+    const pointLight = new THREE.PointLight(0x38bdf8, 3, 50);
+    pointLight.position.set(5, 5, 5);
+    scene.add(pointLight);
+
+    camera.position.z = 4;
+
+    // Анимация вращения
+    function animate3D() {
+      requestAnimationFrame(animate3D);
+      cosmicObject.rotation.x += 0.005;
+      cosmicObject.rotation.y += 0.008;
+      renderer.render(scene, camera);
+    }
+    animate3D();
+
+    // Адаптация под размер окна
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    // Переводы интерфейса
     const indexTranslations = {
       ru: {
         pageTitle: "PXS // Cosmic 3D Stock",
@@ -88,8 +137,7 @@
         heroDesc: "Открытая библиотека цифровых активов, мебели, объектов и природы для ваших проектов.",
         optAllCat: "Все категории",
         searchPlaceholder: "Поиск 3D моделей...",
-        recTag: "Рекомендация недели",
-        recTitleText: "Современная мебель & Интерьер",
+        viewerLabel: "🌌 Интерактивный 3D-просмотр",
         filterAll: "All / Все"
       },
       en: {
@@ -100,8 +148,7 @@
         heroDesc: "An open library of digital assets, furniture, objects, and nature for your projects.",
         optAllCat: "All Categories",
         searchPlaceholder: "Search 3D models...",
-        recTag: "Recommendation of the week",
-        recTitleText: "Modern Furniture & Interior",
+        viewerLabel: "🌌 Interactive 3D Viewer",
         filterAll: "All / Все"
       }
     };
@@ -117,8 +164,7 @@
       document.getElementById('heroDesc').innerText = t.heroDesc;
       document.getElementById('optAllCat').innerText = t.optAllCat;
       document.getElementById('searchInput').placeholder = t.searchPlaceholder;
-      document.getElementById('recTag').innerText = t.recTag;
-      document.getElementById('recTitleText').innerText = t.recTitleText;
+      document.getElementById('viewerLabel').innerText = t.viewerLabel;
       document.getElementById('filterAll').innerText = t.filterAll;
       localStorage.setItem('pxs_lang', lang);
     }
@@ -128,12 +174,11 @@
       loadModels();
     });
 
-    // Загрузка сохраненного языка при старте
     const savedLang = localStorage.getItem('pxs_lang') || 'ru';
     langSwitcher.value = savedLang;
     setIndexLanguage(savedLang);
 
-    // Загрузка моделей из базы данных (связь с админкой)
+    // Загрузка моделей из базы данных (Render)
     async function loadModels(category = 'all', search = '') {
       try {
         const res = await fetch('/api/assets');
@@ -161,7 +206,8 @@
             </div>
             <div style="padding: 16px;">
               <h3 style="font-size: 16px; margin-bottom: 6px; color: #fff;">${model.title}</h3>
-              <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">By ${model.author}</p>
+              <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;">By ${model.author}</p>
+              ${model.file_path ? `<p style="font-size: 11px; color: #38bdf8; margin-bottom: 12px;">📁 ${model.file_path}</p>` : ''}
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 12px; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; color: var(--text-secondary);">${model.category}</span>
                 <span style="color: #4ade80; font-weight: 600; font-size: 14px;">Free</span>
@@ -175,7 +221,6 @@
       }
     }
 
-    // Фильтрация по клику на категории
     document.querySelectorAll('.category-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -186,18 +231,15 @@
       });
     });
 
-    // Фильтрация по выпадающему списку в поиске
     document.getElementById('searchCategory').addEventListener('change', (e) => {
       loadModels(e.target.value, document.getElementById('searchInput').value);
     });
 
-    // Поиск по тексту
     document.getElementById('searchInput').addEventListener('input', (e) => {
       const currentCat = document.getElementById('searchCategory').value;
       loadModels(currentCat, e.target.value);
     });
 
-    // Первичная загрузка моделей
     loadModels();
   </script>
 </body>
