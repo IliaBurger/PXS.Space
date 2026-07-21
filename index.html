@@ -83,7 +83,7 @@
       <p id="modalAuthor" style="font-size: 14px; color: var(--text-secondary); margin-bottom: 20px;">Автор</p>
       
       <!-- Контейнер для 3D просмотра в модалке -->
-      <div id="modalCanvasContainer" style="width: 100%; height: 350px; background: rgba(0,0,0,0.6); border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 20px; position: relative;"></div>
+      <div id="modalCanvasContainer" style="width: 100%; height: 350px; background: rgba(0,0,0,0.6); border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 20px; position: relative; display: flex; align-items: center; justify-content: center;"></div>
       
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <span id="modalCategory" style="font-size: 13px; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 6px; color: var(--text-secondary);">Категория</span>
@@ -125,7 +125,7 @@
     const closeModal = document.getElementById('closeModal');
     let modalRenderer, modalScene, modalCamera, modalMesh, animationFrameId;
 
-    function initModalViewer() {
+    function initModalViewer(filePath) {
       const modalContainer = document.getElementById('modalCanvasContainer');
       modalScene = new THREE.Scene();
       modalCamera = new THREE.PerspectiveCamera(60, modalContainer.clientWidth / modalContainer.clientHeight, 0.1, 1000);
@@ -134,6 +134,7 @@
       modalContainer.innerHTML = '';
       modalContainer.appendChild(modalRenderer.domElement);
 
+      // Если файл есть, показываем объект-заглушку с анимацией (или можно подключить загрузчик GLTF)
       const mGeo = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
       const mMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.7 });
       modalMesh = new THREE.Mesh(mGeo, mMat);
@@ -168,7 +169,7 @@
       }
     });
 
-    // Переводы
+    // Переводы интерфейса
     const indexTranslations = {
       ru: {
         pageTitle: "PXS // Cosmic 3D Stock",
@@ -221,7 +222,7 @@
     langSwitcher.value = savedLang;
     setIndexLanguage(savedLang);
 
-    // Загрузка моделей и привязка клика для открытия 3D просмотра
+    // Загрузка моделей и привязка клика для открытия просмотра и скачивания
     async function loadModels(category = 'all', search = '') {
       try {
         const res = await fetch('/api/assets');
@@ -251,7 +252,7 @@
             <div style="padding: 16px;">
               <h3 style="font-size: 16px; margin-bottom: 6px; color: #fff;">${model.title}</h3>
               <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;">By ${model.author}</p>
-              ${model.file_path ? `<p style="font-size: 11px; color: #38bdf8; margin-bottom: 12px;">📁 ${model.file_path}</p>` : ''}
+              ${model.file_path ? `<p style="font-size: 11px; color: #38bdf8; margin-bottom: 12px;">📁 Файл доступен</p>` : ''}
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 12px; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; color: var(--text-secondary);">${model.category}</span>
                 <span style="color: #4ade80; font-weight: 600; font-size: 14px;">Free</span>
@@ -265,10 +266,9 @@
             document.getElementById('modalAuthor').innerText = `By ${model.author}`;
             document.getElementById('modalCategory').innerText = model.category;
             
-            // Настройка ссылки скачивания (если файл загружен)
             const downloadBtn = document.getElementById('downloadBtn');
             if (model.file_path) {
-              downloadBtn.href = `#`; // Здесь можно указать путь к файлу на сервере, когда настроите сохранение файлов
+              downloadBtn.href = model.file_path; // Ссылка на скачивание файла с сервера
               downloadBtn.style.pointerEvents = 'auto';
               downloadBtn.style.opacity = '1';
             } else {
@@ -278,7 +278,7 @@
             }
 
             modal.style.display = 'flex';
-            setTimeout(initModalViewer, 50); // Инициализация 3D сцены в модалке
+            setTimeout(() => initModalViewer(model.file_path), 50);
           });
 
           grid.appendChild(card);
