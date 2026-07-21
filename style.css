@@ -1,199 +1,145 @@
 :root {
-  --bg-color: #0b0f19;
-  --card-bg: rgba(255, 255, 255, 0.05);
+  --bg-color: #05070c;
+  --card-bg: #0b0f19;
   --border-color: rgba(255, 255, 255, 0.1);
   --text-primary: #ffffff;
   --text-secondary: #94a3b8;
-  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
-  --accent-glow: rgba(168, 85, 247, 0.3);
+  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%);
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 body {
   background-color: var(--bg-color);
   color: var(--text-primary);
   min-height: 100vh;
-  overflow-x: hidden;
-  background-image: 
-    radial-gradient(circle at 15% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 85% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
 }
 
+/* Шапка */
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 40px;
   border-bottom: 1px solid var(--border-color);
-  backdrop-filter: blur(10px);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(11, 15, 25, 0.8);
 }
 
 .logo {
   font-weight: 800;
   font-size: 20px;
-  letter-spacing: 1px;
   background: var(--accent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  letter-spacing: 1px;
 }
 
-nav a {
+header nav a {
   color: var(--text-secondary);
   text-decoration: none;
-  margin-left: 24px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   transition: color 0.2s;
 }
 
-nav a:hover, nav a.active {
+header nav a:hover {
   color: var(--text-primary);
 }
 
+/* Герой-секция с поиском */
 .hero-section {
-  max-width: 1200px;
-  margin: 40px auto;
-  padding: 0 20px;
-  display: grid;
-  grid-template-columns: 1fr 350px;
-  gap: 40px;
-  align-items: center;
+  text-align: center;
+  padding: 60px 20px 40px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.hero-content h1 {
-  font-size: 42px;
-  line-height: 1.2;
-  margin-bottom: 16px;
+.hero-section h1 {
+  font-size: 36px;
   font-weight: 700;
+  margin-bottom: 10px;
+  color: #fff;
 }
 
-.hero-content p {
+.hero-section p {
   color: var(--text-secondary);
   font-size: 16px;
   margin-bottom: 30px;
 }
 
-.search-bar {
-  display: flex;
-  background: var(--card-bg);
+.search-box {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 8px 16px;
-  backdrop-filter: blur(12px);
+  padding: 12px 20px;
+  display: flex;
   align-items: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
 }
 
-.search-bar select, .search-bar input {
+.search-box input {
+  width: 100%;
   background: transparent;
   border: none;
-  color: var(--text-primary);
   outline: none;
-  font-size: 16px;
-}
-
-.search-bar select {
-  padding-right: 15px;
-  margin-right: 15px;
-  border-right: 1px solid var(--border-color);
-  cursor: pointer;
-}
-
-.search-bar select option {
-  background: #1e1b4b;
   color: #fff;
-}
-
-.search-bar input {
-  flex-grow: 1;
-  padding: 8px;
-}
-
-.search-bar input::placeholder {
-  color: var(--text-secondary);
-}
-
-.recommendation-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px var(--accent-glow);
-  transition: transform 0.3s ease;
-}
-
-.recommendation-card:hover {
-  transform: translateY(-5px);
-}
-
-.rec-image {
-  height: 180px;
-  background: var(--accent-gradient);
-}
-
-.rec-info {
-  padding: 16px;
-}
-
-.rec-tag {
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-}
-
-.rec-title {
   font-size: 16px;
-  font-weight: 600;
 }
 
+.search-box input::placeholder {
+  color: var(--text-secondary);
+}
+
+/* Лента категорий с прокруткой */
 .categories-container {
-  max-width: 1200px;
-  margin: 0 auto 30px auto;
-  padding: 0 20px;
   display: flex;
-  gap: 12px;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 15px;
+  gap: 10px;
   overflow-x: auto;
+  padding: 10px 40px 30px;
+  scrollbar-width: none; /* Скрыть скроллбар для Firefox */
+}
+
+.categories-container::-webkit-scrollbar {
+  display: none; /* Скрыть скроллбар для Chrome/Safari */
 }
 
 .category-btn {
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 6px 12px;
-  border-radius: 8px;
-  transition: all 0.2s;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
   white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.category-btn:hover, .category-btn.active {
-  color: var(--text-primary);
-  background: var(--card-bg);
+.category-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
+.category-btn.active {
+  background: #fff;
+  color: #000;
+  font-weight: 600;
+  border-color: #fff;
+}
+
+/* Сетка карточек моделей */
 .models-grid {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px 60px 20px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
+  padding: 0 40px 60px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .model-card {
@@ -201,42 +147,10 @@ nav a:hover, nav a.active {
   border: 1px solid var(--border-color);
   border-radius: 14px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .model-card:hover {
-  border-color: rgba(168, 85, 247, 0.4);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
   transform: translateY(-4px);
-}
-
-.model-preview {
-  height: 200px;
-  background: rgba(255,255,255,0.02);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-.model-details {
-  padding: 16px;
-}
-
-.model-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-.model-author {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-@media (max-width: 768px) {
-  .hero-section {
-    grid-template-columns: 1fr;
-  }
+  border-color: rgba(99, 102, 241, 0.4);
 }
