@@ -65,6 +65,11 @@
           <input type="text" id="modelAuthor" placeholder="Имя автора" required style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; border-radius: 8px;">
         </div>
 
+        <div>
+          <label id="labelFile" style="display: block; margin-bottom: 6px; color: var(--text-secondary);">Файл 3D модели (.obj, .fbx, .gltf)</label>
+          <input type="file" id="modelFile" accept=".obj,.fbx,.gltf,.glb,.zip" required style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; border-radius: 8px; cursor: pointer;">
+        </div>
+
         <button type="submit" id="submitBtn" style="padding: 12px; background: var(--accent-gradient); border: none; color: #fff; font-weight: 600; border-radius: 8px; cursor: pointer; margin-top: 10px;">Опубликовать модель</button>
       </form>
     </div>
@@ -84,6 +89,7 @@
         labelTitle: "Название модели",
         labelCategory: "Категория",
         labelAuthor: "Автор",
+        labelFile: "Файл 3D модели (.obj, .fbx, .gltf)",
         submitBtn: "Опубликовать модель",
         successMsg: "Модель успешно добавлена!",
         errorLogin: "Неверный логин или пароль"
@@ -99,6 +105,7 @@
         labelTitle: "Model Title",
         labelCategory: "Category",
         labelAuthor: "Author",
+        labelFile: "3D Model File (.obj, .fbx, .gltf)",
         submitBtn: "Publish Model",
         successMsg: "Model successfully added!",
         errorLogin: "Invalid username or password"
@@ -119,6 +126,7 @@
       document.getElementById('labelTitle').innerText = t.labelTitle;
       document.getElementById('labelCategory').innerText = t.labelCategory;
       document.getElementById('labelAuthor').innerText = t.labelAuthor;
+      document.getElementById('labelFile').innerText = t.labelFile;
       document.getElementById('submitBtn').innerText = t.submitBtn;
       localStorage.setItem('pxs_lang', lang);
     }
@@ -127,12 +135,10 @@
       setAdminLanguage(e.target.value);
     });
 
-    // Установка языка при загрузке
     const savedLang = localStorage.getItem('pxs_lang') || 'ru';
     langSwitcher.value = savedLang;
     setAdminLanguage(savedLang);
 
-    // Авторизация в админке
     const loginForm = document.getElementById('loginForm');
     const loginSection = document.getElementById('loginSection');
     const adminPanel = document.getElementById('adminPanel');
@@ -150,20 +156,28 @@
       }
     });
 
-    // Отправка данных на сервер (сохранение модели в БД)
     const addModelForm = document.getElementById('addModelForm');
     addModelForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const title = document.getElementById('modelTitle').value;
       const category = document.getElementById('modelCategory').value;
       const author = document.getElementById('modelAuthor').value;
+      const fileInput = document.getElementById('modelFile');
       const currentLang = localStorage.getItem('pxs_lang') || 'ru';
+
+      const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : '';
 
       try {
         const response = await fetch('/api/assets', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, category, author, price: 0, file_path: '' })
+          body: JSON.stringify({ 
+            title, 
+            category, 
+            author, 
+            price: 0, 
+            file_path: fileName 
+          })
         });
 
         if (response.ok) {
