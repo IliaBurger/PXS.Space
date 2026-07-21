@@ -1,20 +1,33 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
+const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Middleware для чтения JSON
 app.use(express.json());
-
-// Раздаем статические файлы прямо из корневой папки репозитория (__dirname)
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Инициализация базы данных SQLite
+// Создаем папку для загрузок, если её нет
+if (!fs.existsSync('./uploads')) {
+  fs.mkdirSync('./uploads');
+}
+
+// Настройка Multer для сохранения 3D файлов
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, './uploads/'),
+  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+});
+const upload = multer({ storage });
+
+// База данных SQLite
 const db = new sqlite3.Database('./pxs.db', (err) => {
-  if (err) console.error('Ошибка подключения к БД', err.message);
-  else console.log('Подключено к базе данных SQLite.');
+  if (err) console.error('Ошибка БД', err.message);
+  else console.log('Подключено к SQLite.');
 });
 
 db.run(`CREATE TABLE IF NOT EXISTS assets (
@@ -27,7 +40,6 @@ db.run(`CREATE TABLE IF NOT EXISTS assets (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`);
 
-// API получения моделей
 app.get('/api/assets', (req, res) => {
   db.all("SELECT * FROM assets ORDER BY id DESC", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -35,13 +47,15 @@ app.get('/api/assets', (req, res) => {
   });
 });
 
-// API добавления модели (для админки)
-app.post('/api/assets', (req, res) => {
-  const { title, category, author, price, file_path } = req.body;
+// Обработка загрузки файла и данных из админки
+app.post('/api/assets', upload.single('modelFile'), (req, res) => {
+  const { title, category, author, price } = req.body;
+  const filePath = req.file ? `/uploads/${req.file.filename}` : '';
+
   const query = `INSERT INTO assets (title, category, author, price, file_path) VALUES (?, ?, ?, ?, ?)`;
-  db.run(query, [title, category, author, price || 0, file_path || ''], function(err) {
+  db.run(query, [title, category, author, price || 0, filePath], function(err) {
     if (err) return res.status(500).json({ error: err.message });
-    res.json({ id: this.lastID });
+    res.json({ id: this.lastID, file_path: filePath });
   });
 });
 
