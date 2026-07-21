@@ -25,8 +25,8 @@
     </nav>
   </header>
 
-  <!-- Герой-секция и Поиск -->
-  <section class="hero">
+  <!-- Центральная секция с заголовком и поиском -->
+  <section class="hero-section">
     <h1 id="heroTitle">Бесплатная коллекция 3D-моделей</h1>
     <p id="heroSubtitle">Загружайте открытые 3D-ресурсы для своих проектов</p>
     <div class="search-box">
@@ -34,38 +34,31 @@
     </div>
   </section>
 
-  <!-- Фильтр категорий -->
-  <section class="categories" id="categoryContainer">
-    <!-- Категории генерируются автоматически через JS -->
-  </section>
+  <!-- Горизонтальная лента категорий -->
+  <div class="categories-container" id="categoryContainer"></div>
 
   <!-- Сетка моделей -->
-  <main class="grid-container" id="modelsGrid">
-    <!-- Карточки загружаются динамически с сервера -->
-  </main>
+  <main class="models-grid" id="modelsGrid"></main>
 
   <!-- Модальное окно 3D-просмотра -->
-  <div id="modal" class="modal" style="display: none;">
-    <div class="modal-content" style="position: relative; width: 90%; max-width: 900px; background: #0b0f19; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin: 40px auto;">
-      <span class="close-btn" id="closeModal" style="position: absolute; top: 15px; right: 20px; font-size: 28px; color: #fff; cursor: pointer; z-index: 10;">&times;</span>
+  <div id="modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 7, 12, 0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #0b0f19; border: 1px solid var(--border-color); border-radius: 16px; width: 100%; max-width: 750px; padding: 30px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+      <span id="closeModal" style="position: absolute; top: 20px; right: 20px; font-size: 28px; color: #fff; cursor: pointer; z-index: 10;">&times;</span>
       
-      <h2 id="modalTitle" style="color: #fff; margin-bottom: 10px;">Название модели</h2>
-      <p id="modalAuthor" style="color: var(--text-secondary); margin-bottom: 15px;">Автор: -</p>
+      <h2 id="modalTitle" style="color: #fff; font-size: 22px; margin-bottom: 6px;">Название модели</h2>
+      <p id="modalAuthor" style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">Автор: -</p>
       
-      <!-- Контейнер для Three.js canvas -->
-      <div id="viewer3d" style="width: 100%; height: 450px; background: #05070c; border-radius: 8px; overflow: hidden; position: relative;"></div>
+      <!-- Контейнер для 3D просмотра -->
+      <div id="viewer3d" style="width: 100%; height: 400px; background: #05070c; border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; position: relative; margin-bottom: 20px;"></div>
 
-      <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <p style="color: var(--text-secondary); font-size: 13px;">💡 Зажмите ЛКМ для вращения, используйте колесико для масштаба</p>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: gap: 10px;">
+        <p style="color: var(--text-secondary); font-size: 13px;">💡 ЛКМ — вращение, Колесико — масштаб</p>
         <a id="downloadBtn" href="#" download style="padding: 12px 24px; background: var(--accent-gradient); color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600;">Скачать 3D-модель</a>
       </div>
     </div>
   </div>
 
   <script>
-    // ----------------------------------------------------
-    // 1. Локализация (RU / EN)
-    // ----------------------------------------------------
     const translations = {
       ru: {
         pageTitle: "PXS // 3D Stock Platform",
@@ -122,9 +115,6 @@
 
     langSwitcher.addEventListener('change', (e) => setLanguage(e.target.value));
 
-    // ----------------------------------------------------
-    // 2. Рендер категорий и фильтрация
-    // ----------------------------------------------------
     function renderCategories() {
       const container = document.getElementById('categoryContainer');
       container.innerHTML = '';
@@ -142,16 +132,13 @@
       });
     }
 
-    // ----------------------------------------------------
-    // 3. Загрузка и рендер карточек
-    // ----------------------------------------------------
     async function fetchModels() {
       try {
         const res = await fetch('/api/assets');
         allModels = await res.json();
         renderModels();
       } catch (err) {
-        console.error("Ошибка при получении моделей с сервера:", err);
+        console.error("Ошибка при получении моделей:", err);
       }
     }
 
@@ -167,19 +154,20 @@
       });
 
       if (filtered.length === 0) {
-        grid.innerHTML = `<p style="color: var(--text-secondary); grid-column: 1/-1; text-align: center;">${translations[currentLang].noModels}</p>`;
+        grid.innerHTML = `<p style="color: var(--text-secondary); grid-column: 1/-1; text-align: center; padding: 40px;">${translations[currentLang].noModels}</p>`;
         return;
       }
 
       filtered.forEach(model => {
         const card = document.createElement('div');
         card.className = 'model-card';
+        card.style.cursor = 'pointer';
         card.innerHTML = `
-          <div class="card-preview" style="height: 180px; background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border-color); cursor: pointer;">
-            <span style="font-size: 36px; opacity: 0.5;">📦</span>
+          <div style="height: 180px; background: rgba(255,255,255,0.02); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border-color);">
+            <span style="font-size: 32px; opacity: 0.5;">📦</span>
           </div>
-          <div class="card-info" style="padding: 16px;">
-            <h3 style="color: #fff; font-size: 16px; margin-bottom: 6px;">${model.title}</h3>
+          <div style="padding: 16px;">
+            <h3 style="color: #fff; font-size: 16px; margin-bottom: 4px;">${model.title}</h3>
             <p style="color: var(--text-secondary); font-size: 13px;">${translations[currentLang].authorPrefix}${model.author}</p>
           </div>
         `;
@@ -191,62 +179,46 @@
 
     document.getElementById('searchInput').addEventListener('input', renderModels);
 
-    // ----------------------------------------------------
-    // 4. Three.js Студийное освещение и OrbitControls
-    // ----------------------------------------------------
     let scene, camera, renderer, controls, currentModelMesh;
 
     function init3DViewer() {
       const container = document.getElementById('viewer3d');
-      container.innerHTML = ''; // Очистка при повторном открытии
+      container.innerHTML = '';
 
       const width = container.clientWidth;
       const height = container.clientHeight;
 
-      // Сцена
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x05070c);
 
-      // Камера
       camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
       camera.position.set(0, 1.5, 4);
 
-      // Рендерер
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.outputEncoding = THREE.sRGBEncoding;
       container.appendChild(renderer.domElement);
 
-      // Интерактивное управление (OrbitControls)
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
-      controls.minDistance = 0.5;
-      controls.maxDistance = 15;
 
-      // --- НАСТРОЙКА ПРОФЕССИОНАЛЬНОГО ОСВЕЩЕНИЯ ---
+      // Студийное освещение
+      scene.add(new THREE.AmbientLight(0xffffff, 1.2));
       
-      // 1. Мягкий рассеянный свет
-      const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
-      scene.add(ambientLight);
-
-      // 2. Главный направленный свет (создает основной объем и глубокие тени)
       const mainLight = new THREE.DirectionalLight(0xffffff, 2.5);
       mainLight.position.set(5, 8, 5);
       scene.add(mainLight);
 
-      // 3. Заполняющий подсвет снизу-слева
       const fillLight = new THREE.DirectionalLight(0xdbeafe, 1.0);
       fillLight.position.set(-5, -2, -3);
       scene.add(fillLight);
 
-      // 4. Контурный синий свет сзади (стильный космический акцент)
       const backLight = new THREE.DirectionalLight(0x38bdf8, 2.2);
       backLight.position.set(0, 4, -5);
       scene.add(backLight);
 
-      // Цикл анимации
       function animate() {
         requestAnimationFrame(animate);
         controls.update();
@@ -257,14 +229,11 @@
 
     function load3DModel(url) {
       if (!url) return;
-
       const loader = new THREE.GLTFLoader();
       loader.load(url, (gltf) => {
         if (currentModelMesh) scene.remove(currentModelMesh);
-
         currentModelMesh = gltf.scene;
 
-        // Автоматическое выравнивание и масштабирование под центр экрана
         const box = new THREE.Box3().setFromObject(currentModelMesh);
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
@@ -279,13 +248,10 @@
 
         scene.add(currentModelMesh);
       }, undefined, (err) => {
-        console.error('Ошибка при загрузке GLTF/GLB файла:', err);
+        console.error('Ошибка загрузки модели:', err);
       });
     }
 
-    // ----------------------------------------------------
-    // 5. Управление модальным окном
-    // ----------------------------------------------------
     const modal = document.getElementById('modal');
     const closeModal = document.getElementById('closeModal');
 
@@ -297,9 +263,8 @@
       downloadBtn.href = model.file_path;
       downloadBtn.setAttribute('download', `${model.title}.glb`);
 
-      modal.style.display = 'block';
+      modal.style.display = 'flex';
 
-      // Инициализируем 3D сцену и загружаем файл
       setTimeout(() => {
         init3DViewer();
         load3DModel(model.file_path);
@@ -318,7 +283,6 @@
       }
     });
 
-    // Инициализация при старте
     setLanguage(currentLang);
     fetchModels();
   </script>
