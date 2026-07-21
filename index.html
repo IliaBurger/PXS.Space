@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="style.css">
   <!-- Подключаем Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Подключаем GLTFLoader для загрузки реальных 3D моделей -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
 
@@ -120,37 +122,61 @@
     }
     animate3D();
 
-    // Модальное окно 3D просмотрщик
+    // Модальное окно 3D просмотрщик с поддержкой реальных GLTF/GLB файлов
     const modal = document.getElementById('modelModal');
     const closeModal = document.getElementById('closeModal');
     let modalRenderer, modalScene, modalCamera, modalMesh, animationFrameId;
 
     function initModalViewer(filePath) {
       const modalContainer = document.getElementById('modalCanvasContainer');
+      modalContainer.innerHTML = '';
+
       modalScene = new THREE.Scene();
       modalCamera = new THREE.PerspectiveCamera(60, modalContainer.clientWidth / modalContainer.clientHeight, 0.1, 1000);
       modalRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       modalRenderer.setSize(modalContainer.clientWidth, modalContainer.clientHeight);
-      modalContainer.innerHTML = '';
       modalContainer.appendChild(modalRenderer.domElement);
 
-      // Если файл есть, показываем объект-заглушку с анимацией (или можно подключить загрузчик GLTF)
-      const mGeo = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
-      const mMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.7 });
-      modalMesh = new THREE.Mesh(mGeo, mMat);
-      modalScene.add(modalMesh);
-
-      modalScene.add(new THREE.AmbientLight(0xffffff, 1.2));
+      modalScene.add(new THREE.AmbientLight(0xffffff, 1.5));
       const plight = new THREE.PointLight(0x6366f1, 3, 50);
       plight.position.set(5, 5, 5);
       modalScene.add(plight);
       modalCamera.position.z = 4;
 
+      if (filePath) {
+        const loader = new THREE.GLTFLoader();
+        loader.load(filePath, (gltf) => {
+          modalMesh = gltf.scene;
+          
+          // Центрирование и авто-масштабирование модели
+          const box = new THREE.Box3().setFromObject(modalMesh);
+          const center = box.getCenter(new THREE.Vector3());
+          const size = box.getSize(new THREE.Vector3());
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const scale = 2 / maxDim;
+          modalMesh.scale.set(scale, scale, scale);
+          modalMesh.position.sub(center.multiplyScalar(scale));
+
+          modalScene.add(modalMesh);
+        }, undefined, (error) => {
+          console.error('Ошибка загрузки модели:', error);
+        });
+      } else {
+        const mGeo = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
+        const mMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.7 });
+        modalMesh = new THREE.Mesh(mGeo, mMat);
+        modalScene.add(modalMesh);
+      }
+
       function animateModal() {
         if (modal.style.display === 'flex') {
           animationFrameId = requestAnimationFrame(animateModal);
-          modalMesh.rotation.x += 0.01;
-          modalMesh.rotation.y += 0.015;
+          if (modalMesh && !filePath) {
+            modalMesh.rotation.x += 0.01;
+            modalMesh.rotation.y += 0.015;
+          } else if (modalMesh && filePath) {
+            modalMesh.rotation.y += 0.005; // Плавное вращение реальной модели
+          }
           modalRenderer.render(modalScene, modalCamera);
         }
       }
@@ -222,7 +248,7 @@
     langSwitcher.value = savedLang;
     setIndexLanguage(savedLang);
 
-    // Загрузка моделей и привязка клика для открытия просмотра и скачивания
+    // Загрузка моделей с сервера
     async function loadModels(category = 'all', search = '') {
       try {
         const res = await fetch('/api/assets');
@@ -260,7 +286,6 @@
             </div>
           `;
 
-          // Открытие модального окна по клику на карточку
           card.addEventListener('click', () => {
             document.getElementById('modalTitle').innerText = model.title;
             document.getElementById('modalAuthor').innerText = `By ${model.author}`;
@@ -268,7 +293,7 @@
             
             const downloadBtn = document.getElementById('downloadBtn');
             if (model.file_path) {
-              downloadBtn.href = model.file_path; // Ссылка на скачивание файла с сервера
+              downloadBtn.href = model.file_path;
               downloadBtn.style.pointerEvents = 'auto';
               downloadBtn.style.opacity = '1';
             } else {
