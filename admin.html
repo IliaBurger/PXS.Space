@@ -66,7 +66,7 @@
         </div>
 
         <div>
-          <label id="labelFile" style="display: block; margin-bottom: 6px; color: var(--text-secondary);">Файл 3D модели (.obj, .fbx, .gltf)</label>
+          <label id="labelFile" style="display: block; margin-bottom: 6px; color: var(--text-secondary);">Файл 3D модели (.obj, .fbx, .gltf, .glb)</label>
           <input type="file" id="modelFile" accept=".obj,.fbx,.gltf,.glb,.zip" required style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; border-radius: 8px; cursor: pointer;">
         </div>
 
@@ -89,7 +89,7 @@
         labelTitle: "Название модели",
         labelCategory: "Категория",
         labelAuthor: "Автор",
-        labelFile: "Файл 3D модели (.obj, .fbx, .gltf)",
+        labelFile: "Файл 3D модели (.obj, .fbx, .gltf, .glb)",
         submitBtn: "Опубликовать модель",
         successMsg: "Модель успешно добавлена!",
         errorLogin: "Неверный логин или пароль"
@@ -105,7 +105,7 @@
         labelTitle: "Model Title",
         labelCategory: "Category",
         labelAuthor: "Author",
-        labelFile: "3D Model File (.obj, .fbx, .gltf)",
+        labelFile: "3D Model File (.obj, .fbx, .gltf, .glb)",
         submitBtn: "Publish Model",
         successMsg: "Model successfully added!",
         errorLogin: "Invalid username or password"
@@ -159,25 +159,24 @@
     const addModelForm = document.getElementById('addModelForm');
     addModelForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const title = document.getElementById('modelTitle').value;
-      const category = document.getElementById('modelCategory').value;
-      const author = document.getElementById('modelAuthor').value;
+      
+      const formData = new FormData();
+      formData.append('title', document.getElementById('modelTitle').value);
+      formData.append('category', document.getElementById('modelCategory').value);
+      formData.append('author', document.getElementById('modelAuthor').value);
+      formData.append('price', 0);
+      
       const fileInput = document.getElementById('modelFile');
-      const currentLang = localStorage.getItem('pxs_lang') || 'ru';
+      if (fileInput.files.length > 0) {
+        formData.append('modelFile', fileInput.files[0]);
+      }
 
-      const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : '';
+      const currentLang = localStorage.getItem('pxs_lang') || 'ru';
 
       try {
         const response = await fetch('/api/assets', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            title, 
-            category, 
-            author, 
-            price: 0, 
-            file_path: fileName 
-          })
+          body: formData
         });
 
         if (response.ok) {
@@ -188,6 +187,7 @@
         }
       } catch (err) {
         console.error(err);
+        alert('Error / Ошибка соединения');
       }
     });
   </script>
