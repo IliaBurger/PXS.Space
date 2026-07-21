@@ -122,7 +122,7 @@
     }
     animate3D();
 
-    // Модальное окно 3D просмотрщик с поддержкой реальных GLTF/GLB файлов
+    // Модальное окно 3D просмотрщик
     const modal = document.getElementById('modelModal');
     const closeModal = document.getElementById('closeModal');
     let modalRenderer, modalScene, modalCamera, modalMesh, animationFrameId;
@@ -137,31 +137,47 @@
       modalRenderer.setSize(modalContainer.clientWidth, modalContainer.clientHeight);
       modalContainer.appendChild(modalRenderer.domElement);
 
-      modalScene.add(new THREE.AmbientLight(0xffffff, 1.5));
-      const plight = new THREE.PointLight(0x6366f1, 3, 50);
-      plight.position.set(5, 5, 5);
-      modalScene.add(plight);
-      modalCamera.position.z = 4;
+      // Яркое освещение со всех сторон, чтобы избежать черных теней
+      modalScene.add(new THREE.AmbientLight(0xffffff, 2.0));
+      
+      const light1 = new THREE.DirectionalLight(0xffffff, 2);
+      light1.position.set(10, 20, 15);
+      modalScene.add(light1);
+
+      const light2 = new THREE.DirectionalLight(0x38bdf8, 1.5);
+      light2.position.set(-10, -10, -15);
+      modalScene.add(light2);
+
+      modalCamera.position.set(0, 0, 5);
 
       if (filePath) {
+        const fullUrl = filePath.startsWith('http') ? filePath : window.location.origin + filePath;
+        
         const loader = new THREE.GLTFLoader();
-        loader.load(filePath, (gltf) => {
+        loader.load(fullUrl, (gltf) => {
           modalMesh = gltf.scene;
           
-          // Центрирование и авто-масштабирование модели
           const box = new THREE.Box3().setFromObject(modalMesh);
           const center = box.getCenter(new THREE.Vector3());
           const size = box.getSize(new THREE.Vector3());
           const maxDim = Math.max(size.x, size.y, size.z);
-          const scale = 2 / maxDim;
-          modalMesh.scale.set(scale, scale, scale);
-          modalMesh.position.sub(center.multiplyScalar(scale));
-
+          
+          if (maxDim > 0) {
+            const scale = 2.5 / maxDim;
+            modalMesh.scale.set(scale, scale, scale);
+          }
+          
+          modalMesh.position.sub(center);
           modalScene.add(modalMesh);
         }, undefined, (error) => {
           console.error('Ошибка загрузки модели:', error);
+          showFallbackTorus();
         });
       } else {
+        showFallbackTorus();
+      }
+
+      function showFallbackTorus() {
         const mGeo = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
         const mMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.7 });
         modalMesh = new THREE.Mesh(mGeo, mMat);
@@ -171,11 +187,8 @@
       function animateModal() {
         if (modal.style.display === 'flex') {
           animationFrameId = requestAnimationFrame(animateModal);
-          if (modalMesh && !filePath) {
-            modalMesh.rotation.x += 0.01;
-            modalMesh.rotation.y += 0.015;
-          } else if (modalMesh && filePath) {
-            modalMesh.rotation.y += 0.005; // Плавное вращение реальной модели
+          if (modalMesh) {
+            modalMesh.rotation.y += 0.007;
           }
           modalRenderer.render(modalScene, modalCamera);
         }
